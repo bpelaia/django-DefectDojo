@@ -35,7 +35,7 @@ services:
     image: sr/teamreviewer-django:${DJANGO_VERSION:-latest}
     entrypoint: ['/wait-for-it.sh', 'oracledbhost:1521', '-t', '30', '--', '/entrypoint-uwsgi.sh']
     extra_hosts:
-      - "oracledbhost:92.204.40.118"
+      - "oracledbhost:192.168.178.119"
     environment:
       #DD_DEBUG: 'False'
       DD_DEBUG: 'True'
@@ -60,7 +60,7 @@ services:
       - rabbitmq
     entrypoint: ['/wait-for-it.sh', 'oracledbhost:1521', '-t', '30', '--', '/entrypoint-celery-beat.sh']
     extra_hosts:
-      - "oracledbhost:92.204.40.118"
+      - "oracledbhost:192.168.178.119"
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL:-oracle://teamreviewer:teamreviewer@/oracledbhost:1521/MYORAPDB}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
@@ -80,9 +80,9 @@ services:
       - rabbitmq
     entrypoint: ['/wait-for-it.sh', 'oracledbhost:1521', '-t', '30', '--', '/entrypoint-celery-worker.sh']
     extra_hosts:
-      - "oracledbhost:92.204.40.118"
+      - "oracledbhost:192.168.178.119"
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-oracledbhost://teamreviewer:teamreviewer@/oracledbhost:1521/MYORAPDB}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-oracle://teamreviewer:teamreviewer@/oracledbhost:1521/MYORAPDB}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
@@ -98,7 +98,7 @@ services:
     image: sr/teamreviewer-django:${DJANGO_VERSION:-latest}
     entrypoint: ['/wait-for-it.sh', 'oracledbhost:1521', '--', '/entrypoint-initializer.sh']
     extra_hosts:
-      - "oracledbhost:92.204.40.118"
+      - "oracledbhost:192.168.178.119"
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL:-oracle://teamreviewer:teamreviewer@/oracledbhost:1521/MYORAPDB}
       DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
