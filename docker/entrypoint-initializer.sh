@@ -37,7 +37,13 @@ fi
 echo "Initializing."
 
 echo -n "Waiting for database to be reachable "
-until echo "select 1;" | python3 manage.py dbshell > /dev/null
+CHECK_QUERY="select 1"
+DBTYPE=$(echo $DD_DATABASE_URL | sed -e 's/:.*$//')
+if [ "oracle" = "${DBTYPE}" ]; then
+  CHECK_QUERY="${CHECK_QUERY} from dual"
+  echo -n "(Oracle) "
+fi
+until echo "${CHECK_QUERY};" | python3 manage.py dbshell > /dev/null
 do
   echo -n "."
   sleep 1
@@ -46,8 +52,14 @@ echo
 
 echo "Making migrations"
 python3 manage.py makemigrations dojo
+
 echo "Migrating"
-python3 manage.py migrate
+for i in admin auditlog contenttypes django_celery_results sessions sites social_django tagging tastypie watson authtoken auth; do
+   python3 manage.py migrate $i
+done
+cat dojo/db_migrations/dojo_migration.sql | python3 manage.py dbshell
+python3 manage.py migrate dojo --fake
+#python3 manage.py migrate
 
 echo "Admin user: ${DD_ADMIN_USER}"
 ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep "${DD_ADMIN_USER}")

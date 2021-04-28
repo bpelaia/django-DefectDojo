@@ -4,7 +4,13 @@ umask 0002
 id
 
 echo -n "Waiting for database to be reachable "
-until echo "select 1;" | python3 manage.py dbshell > /dev/null
+CHECK_QUERY="select 1"
+DBTYPE=$(echo $DD_DATABASE_URL | sed -e 's/:.*$//')
+if [ "oracle" = "${DBTYPE}" ]; then
+  CHECK_QUERY="${CHECK_QUERY} from dual"
+  echo -n "(Oracle) "
+fi
+until echo "${CHECK_QUERY};" | python3 manage.py dbshell > /dev/null
 do
   echo -n "."
   sleep 1

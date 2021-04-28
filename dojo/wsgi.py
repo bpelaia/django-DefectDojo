@@ -16,6 +16,12 @@ framework.
 import os
 import socket
 from socket import error as socket_error
+from django.db import connection
+from uwsgidecorators import postfork
+
+@postfork
+def dbreconnect():
+    connection.connect()
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use

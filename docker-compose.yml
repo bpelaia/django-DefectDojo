@@ -12,35 +12,36 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.nginx
-    image: defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}
+    image: sr/teamreviewer-nginx:${NGINX_VERSION:-latest}
     depends_on:
       - uwsgi
     environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
     volumes:
-      - defectdojo_media:/usr/share/nginx/html/media
+      - teamreviewer_media:/usr/share/nginx/html/media
     ports:
       - target: 8080
-        published: ${DD_PORT:-8080}
+        published: ${DD_PORT:-9092}
         protocol: tcp
         mode: host
       - target: 8443
-        published: ${DD_TLS_PORT:-8443}
+        published: ${DD_TLS_PORT:-9992}
         protocol: tcp
         mode: host
   uwsgi:
     build:
       context: ./
       dockerfile: Dockerfile.django
-    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
-    depends_on:
-      - mysql
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi.sh']
+    image: sr/teamreviewer-django:${DJANGO_VERSION:-latest}
+    entrypoint: ['/wait-for-it.sh', 'oracledbhost:1521', '-t', '30', '--', '/entrypoint-uwsgi.sh']
+    extra_hosts:
+      - "oracledbhost:92.204.40.118"
     environment:
-      DD_DEBUG: 'False'
+      #DD_DEBUG: 'False'
+      DD_DEBUG: 'True'
       DD_DJANGO_METRICS_ENABLED: ${DD_DJANGO_METRICS_ENABLED:-False}
       DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-*}
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-oracle://teamreviewer:teamreviewer@/oracledbhost:1521/MYORAPDB}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
@@ -49,15 +50,19 @@ services:
         - type: bind
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
-        - defectdojo_media:${DD_MEDIA_ROOT:-/app/media}
+        - teamreviewer_media:${DD_MEDIA_ROOT:-/app/media}
   celerybeat:
-    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
+    build:
+      context: ./
+      dockerfile: Dockerfile.django
+    image: sr/teamreviewer-django:${DJANGO_VERSION:-latest}
     depends_on:
-      - mysql
       - rabbitmq
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-beat.sh']
+    entrypoint: ['/wait-for-it.sh', 'oracledbhost:1521', '-t', '30', '--', '/entrypoint-celery-beat.sh']
+    extra_hosts:
+      - "oracledbhost:92.204.40.118"
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-oracle://teamreviewer:teamreviewer@/oracledbhost:1521/MYORAPDB}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
@@ -67,13 +72,17 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   celeryworker:
-    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
+    build:
+      context: ./
+      dockerfile: Dockerfile.django
+    image: sr/teamreviewer-django:latest
     depends_on:
-      - mysql
       - rabbitmq
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-worker.sh']
+    entrypoint: ['/wait-for-it.sh', 'oracledbhost:1521', '-t', '30', '--', '/entrypoint-celery-worker.sh']
+    extra_hosts:
+      - "oracledbhost:92.204.40.118"
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-oracledbhost://teamreviewer:teamreviewer@/oracledbhost:1521/MYORAPDB}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
@@ -83,36 +92,32 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   initializer:
-    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
-    depends_on:
-      - mysql
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '--', '/entrypoint-initializer.sh']
+    build:
+      context: ./
+      dockerfile: Dockerfile.django
+    image: sr/teamreviewer-django:${DJANGO_VERSION:-latest}
+    entrypoint: ['/wait-for-it.sh', 'oracledbhost:1521', '--', '/entrypoint-initializer.sh']
+    extra_hosts:
+      - "oracledbhost:92.204.40.118"
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-oracle://teamreviewer:teamreviewer@/oracledbhost:1521/MYORAPDB}
       DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
       DD_ADMIN_MAIL: ${DD_ADMIN_USER:-admin@defectdojo.local}
       DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-Admin}
       DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-User}
-      DD_INITIALIZE: ${DD_INITIALIZE:-true}
+      #DD_INITIALIZE: ${DD_INITIALIZE:-true}
+      DD_INITIALIZE: ${DD_INITIALIZE:-false}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
     volumes:
         - type: bind
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
-  mysql:
-    image: mysql:5.7.33@sha256:9fc60b229633ce1d1f2ee306705152d4b001056fb27c1b5debe23a732df72b70
-    environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
-      MYSQL_USER: ${DD_DATABASE_USER:-defectdojo}
-      MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
-      MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
-    volumes:
-       - defectdojo_data:/var/lib/mysql
   rabbitmq:
     image: rabbitmq:3.8.14@sha256:316884e1b87d2973914c308d301daf6d61d73aeb680b46b5abd7e47e45d547d7
+    volumes:
+      - teamreviewer_mq:/var/lib/rabbitmq
 volumes:
-  defectdojo_data: {}
-  defectdojo_media: {}
+  teamreviewer_mq: {}
+  teamreviewer_media: {}

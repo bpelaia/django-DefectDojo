@@ -31,6 +31,11 @@ umask 0002
 
 exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
+  --strict \
+  --master \
+  --vacuum \
+  --need-app \
+  --single-interpreter \
   --protocol uwsgi \
   --enable-threads \
   --processes ${DD_UWSGI_NUM_OF_PROCESSES:-2} \
