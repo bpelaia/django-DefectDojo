@@ -98,7 +98,7 @@ class Regulation(models.Model):
     acronym = models.CharField(max_length=20, unique=True, help_text=_('A shortened representation of the name.'))
     category = models.CharField(max_length=9, choices=CATEGORY_CHOICES, help_text=_('The subject of the regulation.'))
     jurisdiction = models.CharField(max_length=64, help_text=_('The territory over which the regulation applies.'))
-    description = models.TextField(blank=True, help_text=_('Information about the regulation\'s purpose.'))
+    description = models.TextField(max_length=1000, blank=True, help_text=_('Information about the regulation\'s purpose.'))
     reference = models.URLField(blank=True, help_text=_('An external URL for more information.'))
 
     class Meta:
@@ -393,7 +393,7 @@ class Note_Type(models.Model):
 
 class NoteHistory(models.Model):
     note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
-    data = models.TextField()
+    data = models.TextField(max_length=3000)
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
     current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
@@ -401,7 +401,7 @@ class NoteHistory(models.Model):
 
 class Notes(models.Model):
     note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
-    entry = models.TextField()
+    entry = models.TextField(max_length=3000)
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
     author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
@@ -669,7 +669,7 @@ class Product(models.Model):
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(max_length=3000, editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     # tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
 
@@ -980,7 +980,7 @@ class Engagement(models.Model):
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name="Deduplication within this engagement only", help_text="If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level.")
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(max_length=3000, editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add.")
 
     class Meta:
@@ -1106,7 +1106,7 @@ class Endpoint(models.Model):
     mitigated = models.BooleanField(default=False, blank=True)
     endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.CharField(max_length=3000, editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
 
     class Meta:
@@ -1249,7 +1249,7 @@ class Test(models.Model):
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(max_length=3000, null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
     estimated_time = models.TimeField(null=True, blank=True, editable=False)
@@ -1265,7 +1265,7 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(max_length=3000, editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.")
 
     version = models.CharField(max_length=100, null=True, blank=True)
@@ -1428,7 +1428,7 @@ class Finding(models.Model):
                                         verbose_name="CVSSv3 score",
                                         help_text="Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding")
 
-    url = models.TextField(null=True,
+    url = models.TextField(max_length=3000, null=True,
                            blank=True,
                            editable=False,
                            verbose_name="URL",
@@ -1436,21 +1436,21 @@ class Finding(models.Model):
     severity = models.CharField(max_length=200,
                                 verbose_name="Severity",
                                 help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational).")
-    description = models.TextField(verbose_name="Description",
+    description = models.TextField(max_length=3000, verbose_name="Description",
                                 help_text="Longer more descriptive information about the flaw.")
-    mitigation = models.TextField(verbose_name="Mitigation",
+    mitigation = models.TextField(max_length=3000, verbose_name="Mitigation",
                                 null=True,
                                 blank=True,
                                 help_text="Text describing how to best fix the flaw.")
-    impact = models.TextField(verbose_name="Impact",
+    impact = models.TextField(max_length=3000, verbose_name="Impact",
                                 null=True,
                                 blank=True,
                                 help_text="Text describing the impact this flaw has on systems, products, enterprise, etc.")
-    steps_to_reproduce = models.TextField(null=True,
+    steps_to_reproduce = models.TextField(max_length=3000, null=True,
                                           blank=True,
                                           verbose_name="Steps to Reproduce",
                                           help_text="Text describing the steps that must be followed in order to reproduce the flaw / bug.")
-    severity_justification = models.TextField(null=True,
+    severity_justification = models.TextField(max_length=3000, null=True,
                                               blank=True,
                                               verbose_name="Severity Justification",
                                               help_text="Text describing why a certain severity was associated with this flaw.")
@@ -1467,7 +1467,7 @@ class Finding(models.Model):
     unsaved_request = None
     unsaved_response = None
     unsaved_tags = None
-    references = models.TextField(null=True,
+    references = models.TextField(max_length=3000, null=True,
                                   blank=True,
                                   db_column="refs",
                                   verbose_name="References",
@@ -1601,22 +1601,22 @@ class Finding(models.Model):
                                    verbose_name="Line Number",
                                    help_text="Deprecated will be removed, use line",
                                    editable=False)  # Deprecated will be removed, use line
-    sourcefilepath = models.TextField(null=True,
+    sourcefilepath = models.TextField(max_length=3000, null=True,
                                       blank=True,
                                       editable=False,
                                       verbose_name="Source File Path",
                                       help_text="Filepath of the source code file in which the flaw is located.")  # Not used? to remove
-    sourcefile = models.TextField(null=True,
+    sourcefile = models.TextField(max_length=3000, null=True,
                                   blank=True,
                                   editable=False,
                                   verbose_name="Source File",
                                   help_text="Name of the source code file in which the flaw is located.")
-    param = models.TextField(null=True,
+    param = models.TextField(max_length=3000, null=True,
                              blank=True,
                              editable=False,
                              verbose_name="Parameter",
                              help_text="Parameter used to trigger the issue (DAST).")
-    payload = models.TextField(null=True,
+    payload = models.TextField(max_length=3000, null=True,
                                blank=True,
                                editable=False,
                                verbose_name="Payload",
@@ -1712,7 +1712,7 @@ class Finding(models.Model):
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(max_length=3000, editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -2260,10 +2260,10 @@ Finding.endpoints.through.__str__ = lambda \
 
 
 class Stub_Finding(models.Model):
-    title = models.TextField(max_length=1000, blank=False, null=False)
+    title = models.TextField(max_length=3000, blank=False, null=False)
     date = models.DateField(default=get_current_date, blank=False, null=False)
     severity = models.CharField(max_length=200, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(max_length=3000, blank=True, null=True)
     test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
     reporter = models.ForeignKey(User, editable=False, default=1, on_delete=models.CASCADE)
 
@@ -2289,16 +2289,16 @@ class Finding_Template(models.Model):
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    mitigation = models.TextField(null=True, blank=True)
-    impact = models.TextField(null=True, blank=True)
-    references = models.TextField(null=True, blank=True, db_column="refs")
+    description = models.TextField(max_length=3000, null=True, blank=True)
+    mitigation = models.TextField(max_length=3000, null=True, blank=True)
+    impact = models.TextField(max_length=3000, null=True, blank=True)
+    references = models.TextField(max_length=3000, null=True, blank=True, db_column="refs")
     last_used = models.DateTimeField(null=True, editable=False)
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(max_length=3000, editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -2409,12 +2409,12 @@ class Risk_Acceptance(models.Model):
 
     recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_FIX, help_text="Recommendation from the security team.", verbose_name="Security Recommendation")
 
-    recommendation_details = models.TextField(null=True,
+    recommendation_details = models.TextField(max_length=3000, null=True,
                                       blank=True,
                                       help_text="Explanation of security recommendation", verbose_name="Security Recommendation Details")
 
     decision = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_ACCEPT, help_text="Risk treatment decision by risk owner")
-    decision_details = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
+    decision_details = models.TextField(max_length=3000, default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
 
     accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The person that accepts the risk, can be outside of DefectDojo.")
     path = models.FileField(upload_to='risk/%Y/%m/%d',
@@ -2475,7 +2475,7 @@ class Report(models.Model):
     file = models.FileField(upload_to='reports/%Y/%m/%d',
                             verbose_name='Report File', null=True)
     status = models.CharField(max_length=10, default='requested')
-    options = models.TextField()
+    options = models.TextField(max_length=3000)
     datetime = models.DateTimeField(auto_now_add=True)
     done_datetime = models.DateTimeField(null=True)
 
@@ -2614,7 +2614,7 @@ class JIRA_Instance(models.Model):
     medium_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Medium")
     high_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: High")
     critical_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Critical")
-    finding_text = models.TextField(null=True, blank=True, help_text="Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information.")
+    finding_text = models.TextField(max_length=3000, null=True, blank=True, help_text="Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information.")
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to an Accepted Finding")
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to a False Positive Finding")
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Globally send SLA notifications as comment?", help_text="This setting can be overidden at the Product level")
@@ -2950,7 +2950,7 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(max_length=3000, editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True)
 
     def __str__(self):
@@ -2977,7 +2977,7 @@ class Objects_Product(models.Model):
     review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(max_length=3000, editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add.")
 
     def __str__(self):
@@ -3031,7 +3031,7 @@ class Testing_Guide(models.Model):
     name = models.CharField(max_length=400, help_text="Name of the test")
     summary = models.CharField(max_length=800, help_text="Summary of the test")
     objective = models.CharField(max_length=800, help_text="Objective of the test")
-    how_to_test = models.TextField(default=None, help_text="How to test the objective")
+    how_to_test = models.TextField(max_length=3000, default=None, help_text="How to test the objective")
     results_expected = models.CharField(max_length=800, help_text="What the results look like for a test")
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
@@ -3060,8 +3060,8 @@ class Benchmark_Type(models.Model):
 class Benchmark_Category(models.Model):
     type = models.ForeignKey(Benchmark_Type, verbose_name='Benchmark Type', on_delete=models.CASCADE)
     name = models.CharField(max_length=300)
-    objective = models.TextField()
-    references = models.TextField(blank=True, null=True)
+    objective = models.TextField(max_length=4000)
+    references = models.TextField(max_length=3000, blank=True, null=True)
     enabled = models.BooleanField(default=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
@@ -3076,8 +3076,8 @@ class Benchmark_Category(models.Model):
 class Benchmark_Requirement(models.Model):
     category = models.ForeignKey(Benchmark_Category, on_delete=models.CASCADE)
     objective_number = models.CharField(max_length=15, null=True)
-    objective = models.TextField()
-    references = models.TextField(blank=True, null=True)
+    objective = models.TextField(max_length=3000)
+    references = models.TextField(max_length=3000, blank=True, null=True)
     level_1 = models.BooleanField(default=False)
     level_2 = models.BooleanField(default=False)
     level_3 = models.BooleanField(default=False)
@@ -3162,7 +3162,7 @@ class Rule(models.Model):
 
     name = models.CharField(max_length=200)
     enabled = models.BooleanField(default=True)
-    text = models.TextField()
+    text = models.TextField(max_length=3000)
     operator = models.CharField(max_length=30, choices=operator_options)
     """
     model_object_options = (('Product', 'Product'),
@@ -3173,7 +3173,7 @@ class Rule(models.Model):
     model_object_options = (('Finding', 'Finding'),)
     model_object = models.CharField(max_length=30, choices=model_object_options)
     match_field = models.CharField(max_length=200, choices=all_options)
-    match_text = models.TextField()
+    match_text = models.TextField(max_length=3000)
     application = models.CharField(max_length=200, choices=application_options)
     applies_to = models.CharField(max_length=30, choices=model_object_options)
     # TODO: Add or ?
@@ -3195,7 +3195,7 @@ class Child_Rule(models.Model):
     model_object_options = (('Finding', 'Finding'),)
     model_object = models.CharField(max_length=30, choices=model_object_options)
     match_field = models.CharField(max_length=200, choices=all_options)
-    match_text = models.TextField()
+    match_text = models.TextField(max_length=3000)
     # TODO: Add or ?
     # and_rules = models.ManyToManyField('self')
     parent_rule = models.ForeignKey(Rule, editable=False, null=True, on_delete=models.CASCADE)
@@ -3228,7 +3228,7 @@ class Question(PolymorphicModel, TimeStampedModel):
         default=False,
         help_text="If selected, user doesn't have to answer this question")
 
-    text = models.TextField(blank=False, help_text='The question text', default='')
+    text = models.TextField(max_length=3000, blank=False, help_text='The question text', default='')
 
     def __str__(self):
         return self.text
@@ -3254,7 +3254,7 @@ class Choice(TimeStampedModel):
 
     order = models.PositiveIntegerField(default=1)
 
-    label = models.TextField(default="")
+    label = models.TextField(max_length=3000, default="")
 
     class Meta:
         ordering = ['order']
@@ -3287,7 +3287,7 @@ class ChoiceQuestion(Question):
 class Engagement_Survey(models.Model):
     name = models.CharField(max_length=200, null=False, blank=False,
                             editable=True, default='')
-    description = models.TextField(editable=True, default='')
+    description = models.TextField(max_length=3000, editable=True, default='')
     questions = models.ManyToManyField(Question)
     active = models.BooleanField(default=True)
 
@@ -3353,7 +3353,7 @@ class Answer(PolymorphicModel, TimeStampedModel):
 
 
 class TextAnswer(Answer):
-    answer = models.TextField(
+    answer = models.TextField(max_length=3000, 
         blank=False,
         help_text='The answer text',
         default='')
