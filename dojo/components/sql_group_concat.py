@@ -25,3 +25,30 @@ class Sql_GroupConcat(Aggregate):
                               connection,
                               template='%(function)s(%(distinct)s%(expressions)s%(ordering)s)',
                               **extra)
+
+## MySQL: SELECT country, GROUP_CONCAT(person) FROM mytable GROUP BY country
+## Oracle: SELECT country,
+##  LISTAGG(person, ', ') WITHIN GROUP (
+## ORDER BY person) "names"
+## FROM mytable
+## GROUP BY country;
+
+class Oracle_GroupConcat(Aggregate):
+    function = 'LISTAGG'
+    allow_distinct = True
+
+    def __init__(self, expression, separator, distinct=False, ordering=None, **extra):
+        self.separator = separator
+        super(Oracle_GroupConcat, self).__init__(expression,
+                                              #distinct='DISTINCT ' if distinct else '',
+                                              distinct='',
+                                              ordering=' WITHIN GROUP (ORDER BY %s)' % ordering if ordering is not None else ' WITHIN GROUP (ORDER BY %s)' % expression,
+                                              separator=" , '%s'" % separator,
+                                              output_field=CharField(),
+                                              **extra)
+
+    def as_sql(self, compiler, connection, **extra):
+        return super().as_sql(compiler,
+                              connection,
+                              template='%(function)s(%(expressions)s%(separator)s)%(ordering)s',
+                              **extra)

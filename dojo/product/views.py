@@ -32,7 +32,7 @@ from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
 from django.contrib.postgres.aggregates import StringAgg
-from dojo.components.sql_group_concat import Sql_GroupConcat
+from dojo.components.sql_group_concat import Sql_GroupConcat, Oracle_GroupConcat
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from django.conf import settings
@@ -204,6 +204,10 @@ def view_product_components(request, pid):
         component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name").order_by(
             'component_name').annotate(
             component_version=StringAgg('component_version', delimiter=separator, distinct=True))
+    elif connection.vendor == 'oracle':
+        component_query = Finding.objects.values("component_name").order_by('component_name')
+        component_query = component_query.annotate(component_version=Oracle_GroupConcat(
+            'component_version', separator=separator, distinct=False))
     else:
         component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name")
         component_query = component_query.annotate(
