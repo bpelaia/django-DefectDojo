@@ -10,7 +10,7 @@ DD_SECRET_KEY=#DD_SECRET_KEY#
 # Key for encrypting credentials in the manager
 DD_CREDENTIAL_AES_256_KEY=#DD_CREDENTIAL_AES_256_KEY#
 
-# Database URL, options: postgres://, mysql://, sqlite://, to use unsafe characters encode with urllib.parse.encode
+# Database URL, options: postgres://, mysql://, sqlite://, oracle://, to use unsafe characters encode with urllib.parse.encode
 DD_DATABASE_URL=#DD_DATABASE_URL#
 
 # Hosts/domain names that are valid for this site;
@@ -24,6 +24,24 @@ DD_WHITENOISE=on
 # -------------------------------------------------------
 # Additional Settings / Override defaults in settings.py
 # -------------------------------------------------------
+
+# DefectDojo's Site URL
+SITE_URL=#DD_SITE_URL#
+
+# DefectDojo's root directory
+DOJO_ROOT=#DOJO_ROOT#
+
+# Media's root
+MEDIA_ROOT=#MEDIA_ROOT#
+
+# Media's URL
+MEDIA_URL=#MEDIA_URL#
+
+# Static Root
+STATIC_ROOT=#DD_STATIC_ROOT#
+
+# Static URL
+STATIC_URL=#DD_STATIC_URL#
 
 # Timezone - default is America/New_York
 DD_TIME_ZONE=#DD_TIME_ZONE#
