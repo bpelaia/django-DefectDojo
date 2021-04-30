@@ -42,6 +42,7 @@ from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.product.urls import urlpatterns as prod_urls
 from dojo.product_type.urls import urlpatterns as pt_urls
 from dojo.reports.urls import urlpatterns as reports_urls
+from dojo.trscan.urls import urlpatterns as trscan_urls #SR
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
@@ -122,7 +123,7 @@ v2_api.register(r'test_imports', TestImportViewSet)
 v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)
-v2_api.register(r'users', UsersViewSet)
+v2_api.register(r'admin_users', UsersViewSet)  #SR
 v2_api.register(r'import-scan', ImportScanView, basename='importscan')
 v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
 v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
@@ -141,6 +142,7 @@ ur += metrics_urls
 ur += prod_urls
 ur += pt_urls
 ur += reports_urls
+ur += trscan_urls #SR
 ur += search_urls
 ur += test_type_urls
 ur += test_urls

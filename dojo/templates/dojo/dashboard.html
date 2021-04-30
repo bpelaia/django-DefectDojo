@@ -1,13 +1,21 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load event_tags %}
 {% block add_styles %}
     .chart {height: 300px}
     .status .panel {min-height: 140px;background-color: #f5f5f5;}
     #punchcard {height: 350px}
 {% endblock %}
-
 {% block content %}
+
+    {% if request.user.is_superuser %}
+        <H3>Team Dashboard
+	<a href="{% url 'trscan' %}" target="_blank" style="display: block; text-align: right;">Static Analysis</a></H3>
+    {% else %}
+        <H3>Dashboard for {{ request.user.get_full_name }}
+	<a href="{% url 'trscan' %}" target="_blank" style="display: block; text-align: right;">Static Analysis</a></H3>
+    {% endif %}
+
     <div class="row status">
         <div class="col-lg-3 col-md-6">
             <div class="panel secondary-color">
@@ -22,12 +30,16 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'engagement' %}">
-                    <div class="panel-footer">
-                        <span class="pull-left">View Engagement Details</span>
-                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                        <div class="clearfix"></div>
-                    </div>
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'engagement' %}">
+                {% else %}
+                    <a href="{% url 'engagement' %}?engagement__lead={{ request.user.id }}">
+                {% endif %}
+                <div class="panel-footer">
+                    <span class="pull-left">View Engagement Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
                 </a>
             </div>
         </div>
@@ -40,14 +52,19 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{ finding_count }}</div>
-                            <div>Last Seven Days</div>
+                            <div>Last 30 Days</div>
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'all_findings' %}?duplicate=2&date=2">
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'open_findings' %}?date=2&o=numerical_severity">
+                {% else %}
+                    <a href="{% url 'open_findings' %}?date=2&reporter={{ request.user.id }}&o=numerical_severity">
+                {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Finding Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+
                         <div class="clearfix"></div>
                     </div>
                 </a>
@@ -62,14 +79,19 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{ mitigated_count }}</div>
-                            <div>Closed In Last Seven Days</div>
+                            <div>Closed-Last 30 Days</div>
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'closed_findings' %}?duplicate=2&mitigated=2">
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'closed_findings' %}?mitigated=2&o=-mitigated">
+                {% else %}
+                    <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=-mitigated">
+                {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Finding Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+
                         <div class="clearfix"></div>
                     </div>
                 </a>
@@ -84,14 +106,19 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{ accepted_count }}</div>
-                            <div>Risk Accepted In Last Seven Days</div>
+                            <div>Risk Accepted-Last 30 Days</div>
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2">
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'accepted_findings' %}?test__engagement__risk_acceptance__created=2">
+                {% else %}
+                    <a href="{% url 'accepted_findings' %}?test__engagement__risk_acceptance__created=2&test__engagement__risk_acceptance__reporter={{ request.user.id }}">
+                {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Finding Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+
                         <div class="clearfix"></div>
                     </div>
                 </a>
@@ -127,6 +154,7 @@
         </div>
         <!-- /.col-lg-6 -->
     </div>
+<!--
     <div class="row">
         <div class="col-lg-12">
             <div class="panel panel-default">
@@ -203,6 +231,7 @@
             </div>
         </div>
     </div>
+-->
     <div class="row">
         {% if punchcard %}
             <div class="col-lg-12">

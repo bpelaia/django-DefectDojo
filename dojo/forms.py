@@ -1647,6 +1647,40 @@ class ReportOptionsForm(forms.Form):
     include_disclaimer = forms.ChoiceField(choices=yes_no, label="Disclaimer")
     report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
+class TrscanOptionsForm(forms.Form):
+        appl = forms.CharField(max_length=100, required=True, label="Application", help_text="Application")
+        vers = forms.CharField(max_length=100, required=True, label="Version", help_text="Version")
+        auditor = forms.CharField(max_length=100, required=True, label="Auditor", help_text="Auditor")
+        scan_date = forms.DateTimeField(
+        required=True,
+        label="Audit Date",
+        help_text="Scan execution date will be used on all findings.",
+        initial=datetime.now().strftime("%Y-%m-%d"),
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    
+
+        LOAD_CHOICES = (
+	    ('Folder','Folder'),
+	    ('Component', 'Component'),
+	    ('Project','Project'),
+        )
+
+        loadtype = forms.CharField(max_length=9,       widget=forms.Select(choices=LOAD_CHOICES), label='Load Type')
+    
+        incr = forms.BooleanField(required=False, label="Incremental Analysis", help_text="Incremental Analysis")
+        RULES_CHOICES = (
+	    ('OWASP','OWASP TopTen 2017'),
+	    ('CWE', 'CWE-SANS Top 25'),
+	    ('Custom','Custom'),
+        )
+
+        rules = forms.CharField(max_length=16, widget=forms.Select(choices=RULES_CHOICES), label='Rules (Security)')
+        RULED_CHOICES = (
+	    ('CWE', 'CWE-SANS Top 25'),
+	    ('Custom','Custom'),
+        )
+
+        ruled = forms.CharField(max_length=16, widget=forms.Select(choices=RULED_CHOICES), label='Rules (Dead Code)')
 
 class CustomReportOptionsForm(forms.Form):
     yes_no = (('0', 'No'), ('1', 'Yes'))

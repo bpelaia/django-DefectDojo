@@ -26,18 +26,15 @@ curl -X POST -H 'content-type: application/json' {% if request.is_secure %}https
 # Format is ``Authorization: Token &lt;api_key&gt;
 Authorization: Token {{ key.key }}
 	</pre>
-    <p>Here is a simple python example against the /users endpoint</p>
+    <p>Here is a simple python example against the /admin-users endpoint</p>
     <pre>
 import requests
 
-url = '{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v2/users/'
+url = '{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v2/admin-users/'
 headers = {'content-type': 'application/json',
            'Authorization': 'Token {{ key.key }}'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-for key, value in r.__dict__.iteritems():
-  print key
-  print value
-  print '------------------'
+print.json()
 	</pre>
 {% endblock %}

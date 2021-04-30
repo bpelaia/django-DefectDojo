@@ -626,20 +626,17 @@
                 <div class="col-md-12 text-center text-">
                     <p>
                         <a href="{% url 'home' %}"><img class="logo" src="{% static "dojo/img/chop.png" %}"
-                                                        alt="DefectDojo Chop" height="45"/></a><br/>
-                        {% dojo_version %} ( {% dojo_current_hash %} )
+                                                        alt="DefectDojo" height="45"/></a><br/>
+                        <br>Powered By OWASP DefectDojo {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
-                    <p>
-                        Detailed DefectDojo documentation can be found at  <a
-                            href="{% dojo_docs_url %}">Read The Docs</a>.
-                    </p>
+                    
                     <p>
                         DefectDojo is licensed under the <a
                             href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md">Simplified BSD
                         license</a>.
                     </p>
                     <p>
-                        &copy; {% now "Y" %} DefectDojo
+                        &copy; {% now "Y" %} Security Reviewer
                     </p>
                 </div>
             </div>
@@ -648,8 +645,6 @@
         <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
     </footer>
 </div>
-
-<!-- /#wrapper -->
 
 <!-- our JS -->
 <script src="{% static "dojo/js/index.js" %}"></script>
