@@ -1648,10 +1648,10 @@ class ReportOptionsForm(forms.Form):
     report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 class TrscanOptionsForm(forms.Form):
-        appl = forms.CharField(max_length=100, required=True, label="Application", help_text="Application")
-        vers = forms.CharField(max_length=100, required=True, label="Version", help_text="Version")
-        auditor = forms.CharField(max_length=100, required=True, label="Auditor", help_text="Auditor")
-        scan_date = forms.DateTimeField(
+    appl = forms.CharField(max_length=80, required=True, label="Application", help_text="Application")
+    vers = forms.CharField(max_length=80, required=True, label="Version", help_text="Version")
+    auditor = forms.CharField(max_length=80, required=True, label="Auditor", help_text="Auditor")
+    scan_date = forms.DateTimeField(
         required=True,
         label="Audit Date",
         help_text="Scan execution date will be used on all findings.",
@@ -1659,28 +1659,34 @@ class TrscanOptionsForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     
 
-        LOAD_CHOICES = (
+    LOAD_CHOICES = (
 	    ('Folder','Folder'),
 	    ('Component', 'Component'),
 	    ('Project','Project'),
-        )
+    )
 
-        loadtype = forms.CharField(max_length=9,       widget=forms.Select(choices=LOAD_CHOICES), label='Load Type')
+    loadtype = forms.CharField(max_length=9,  widget=forms.Select(choices=LOAD_CHOICES), label='Load Type')
     
-        incr = forms.BooleanField(required=False, label="Incremental Analysis", help_text="Incremental Analysis")
-        RULES_CHOICES = (
+    incr = forms.BooleanField(required=False, label="Incremental Analysis", help_text="Incremental Analysis")
+    RULES_CHOICES = (
 	    ('OWASP','OWASP TopTen 2017'),
 	    ('CWE', 'CWE-SANS Top 25'),
 	    ('Custom','Custom'),
-        )
+    )
 
-        rules = forms.CharField(max_length=16, widget=forms.Select(choices=RULES_CHOICES), label='Rules (Security)')
-        RULED_CHOICES = (
+    rules = forms.CharField(max_length=16, widget=forms.Select(choices=RULES_CHOICES), label='Rules (Security)')
+    RULED_CHOICES = (
 	    ('CWE', 'CWE-SANS Top 25'),
 	    ('Custom','Custom'),
-        )
+    )
 
-        ruled = forms.CharField(max_length=16, widget=forms.Select(choices=RULED_CHOICES), label='Rules (Dead Code)')
+    ruled = forms.CharField(max_length=16, widget=forms.Select(choices=RULED_CHOICES), label='Rules (Dead Code)')
+
+    Blocker = forms.BooleanField(required=False, label="Blocker", help_text="Severity 1 (Very High)", initial=True)
+    Critical = forms.BooleanField(required=False, label="Critical", help_text="Severity 2 (High)", initial=True)
+    Major = forms.BooleanField(required=False, label="Major", help_text="Severity 3 (Medium)", initial=True)
+    Minor = forms.BooleanField(required=False, label="Minor", help_text="Severity 4 (Low)", initial=True)
+    Info = forms.BooleanField(required=False, label="Info", help_text="Severity 5 (Very Low)", initial=True)
 
 class CustomReportOptionsForm(forms.Form):
     yes_no = (('0', 'No'), ('1', 'Yes'))

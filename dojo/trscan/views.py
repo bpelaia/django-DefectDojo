@@ -25,7 +25,7 @@ from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, Endpoin
 from dojo.forms import ReportOptionsForm, DeleteReportForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint, Report, Risk_Acceptance
-from dojo.trscan.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
+from dojo.trscan.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, ExclusionContent, FPContent, AnalysisContent, LanguageContent, OpenXMLContent, FindingList, EndpointList, \
     CustomReportJsonForm, TrscanOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
@@ -74,6 +74,11 @@ def trscan(request):
     available_widgets = [CoverPage(request=request),
                          TableOfContents(request=request),
                          WYSIWYGContent(request=request),
+                         ExclusionContent(request=request),
+                         FPContent(request=request),
+                         AnalysisContent(request=request),
+                         LanguageContent(request=request),
+                         OpenXMLContent(request=request),
                          FindingList(request=request, findings=findings)]
     return render(request,
                   'dojo/TRScan.html',

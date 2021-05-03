@@ -37,50 +37,43 @@ class CustomReportJsonForm(forms.Form):
 
 
 class CoverPageForm(forms.Form):
-    appl = forms.CharField(max_length=100, required=True, label="Application", help_text="Application")
-    vers = forms.CharField(max_length=100, required=True, label="Version", help_text="Version")
-    auditor = forms.CharField(max_length=100, required=True, label="Auditor", help_text="Auditor")
-    scan_date = forms.DateTimeField(
-        required=True,
-        label="Audit Date",
-        help_text="Scan execution date will be used on all findings.",
-        initial=datetime.now().strftime("%Y-%m-%d"),
-        widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    sourcefolder = forms.FilePathField(path='/', required=True, label="Source Folder", allow_folders=True, allow_files=False, recursive=True)
     
-
-    LOAD_CHOICES = (
-	    ('Folder','Folder'),
-	    ('Component', 'Component'),
-	    ('Project','Project'),
-    )
-
-    loadtype = forms.CharField(max_length=9,  widget=forms.Select(choices=LOAD_CHOICES), label='Load Type')
-    
-    incr = forms.BooleanField(required=False, label="Incremental Analysis", help_text="Incremental Analysis")
-    RULES_CHOICES = (
-	    ('OWASP','OWASP TopTen 2017'),
-	    ('CWE', 'CWE-SANS Top 25'),
-	    ('Custom','Custom'),
-    )
-
-    rules = forms.CharField(max_length=16, widget=forms.Select(choices=RULES_CHOICES), label='Rules (Security)')
-    RULED_CHOICES = (
-	    ('CWE', 'CWE-SANS Top 25'),
-	    ('Custom','Custom'),
-    )
-
-    ruled = forms.CharField(max_length=16, widget=forms.Select(choices=RULED_CHOICES), label='Rules (Dead Code)')
-    Blocker = forms.BooleanField(required=False, label="Blocker", help_text="Severity 1 (Very High)", initial=True)
-    Critical = forms.BooleanField(required=False, label="Critical", help_text="Severity 2 (High)", initial=True)
-    Major = forms.BooleanField(required=False, label="Major", help_text="Severity 3 (Medium)", initial=True)
-    Minor = forms.BooleanField(required=False, label="Minor", help_text="Severity 4 (Low)", initial=True)
-    Info = forms.BooleanField(required=False, label="Info", help_text="Severity 5 (Very Low)", initial=True)
     class Meta:
         exclude = []
 
+class ExclusionContentForm(forms.Form):
+    exclusions = forms.FilePathField(path='/', required=True, label="Exclusion List", allow_folders=False, allow_files=True)
+    
+    class Meta:
+        exclude = []
+
+class FPContentForm(forms.Form):
+    exclusions = forms.FilePathField(path='/', required=True, label="False Positives", allow_folders=False, allow_files=True)
+    
+    class Meta:
+        exclude = []
+
+class AnalysisContentForm(forms.Form):
+    exclusions = forms.FilePathField(path='/', required=True, label="Analysis Options", allow_folders=False, allow_files=True)
+    
+    class Meta:
+        exclude = []
+
+class LanguageContentForm(forms.Form):
+    exclusions = forms.FilePathField(path='/', required=True, label="Language Options", allow_folders=False, allow_files=True)
+    
+    class Meta:
+        exclude = []
+
+class OpenXMLContentForm(forms.Form):
+    exclusions = forms.FilePathField(path='/', required=True, label="Open XML Analysis", allow_folders=False, allow_files=True)
+    
+    class Meta:
+        exclude = []
 
 class TableOfContentsForm(forms.Form):
-    sourcefolder = forms.FilePathField(path='/', required=True, label="Source Folder", allow_folders=True)
+    sourcefolder = forms.FilePathField(path='/', required=True, label="ALM", allow_folders=True, allow_files=False, recursive=True)
     
 
 
@@ -137,7 +130,7 @@ class Div(form_widget):
 
 
 class WYSIWYGContentForm(forms.Form):
-    heading = forms.CharField(max_length=200, required=False, initial="Analysis Options")
+    heading = forms.CharField(max_length=80, required=False, initial="Analysis Options")
     content = forms.CharField(required=False, widget=Div(attrs={'class': 'editor'}))
     hidden_content = forms.CharField(widget=forms.HiddenInput(), required=True)
 
@@ -210,58 +203,156 @@ class TrscanOptions(Widget):
                                                             "extra_help": self.extra_help})
         return mark_safe(html)
 
-
-class CoverPage(Widget):
-    appl = forms.CharField(max_length=100, required=True, label="Application", help_text="Application")
-    vers = forms.CharField(max_length=100, required=True, label="Version", help_text="Version")
-    auditor = forms.CharField(max_length=100, required=True, label="Auditor", help_text="Auditor")
-    scan_date = forms.DateTimeField(
-        required=True,
-        label="Audit Date",
-        help_text="Scan execution date will be used on all findings.",
-        initial=datetime.now().strftime("%Y-%m-%d"),
-        widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    
-
-    LOAD_CHOICES = (
-	    ('Folder','Folder'),
-	    ('Component', 'Component'),
-	    ('Project','Project'),
-    )
-
-    loadtype = forms.CharField(max_length=9,  widget=forms.Select(choices=LOAD_CHOICES), label='Load Type')
-    
-    incr = forms.BooleanField(required=False, label="Incremental Analysis", help_text="Incremental Analysis")
-    RULES_CHOICES = (
-	    ('OWASP','OWASP TopTen 2017'),
-	    ('CWE', 'CWE-SANS Top 25'),
-	    ('Custom','Custom'),
-    )
-
-    rules = forms.CharField(max_length=16, widget=forms.Select(choices=RULES_CHOICES), label='Rules (Security)')
-    RULED_CHOICES = (
-	    ('CWE', 'CWE-SANS Top 25'),
-	    ('Custom','Custom'),
-    )
-
-    ruled = forms.CharField(max_length=16, widget=forms.Select(choices=RULED_CHOICES), label='Rules (Dead Code)')
-
-    Blocker = forms.BooleanField(required=False, label="Blocker", help_text="Severity 1 (Very High)", initial=True)
-    Critical = forms.BooleanField(required=False, label="Critical", help_text="Severity 2 (High)", initial=True)
-    Major = forms.BooleanField(required=False, label="Major", help_text="Severity 3 (Medium)", initial=True)
-    Minor = forms.BooleanField(required=False, label="Minor", help_text="Severity 4 (Low)", initial=True)
-    Info = forms.BooleanField(required=False, label="Info", help_text="Severity 5 (Very Low)", initial=True)
+class ExclusionContent(Widget):
+    def __init__(self, *args, **kwargs):
+        super(ExclusionContent, self).__init__(*args, **kwargs)
+        self.title = 'Exclusion List'
+        self.form = ExclusionContentForm()
+        self.extra_help = "Select the Exclusion List File"
+        
 
     class Meta:
         exclude = []
 
+    def get_asciidoc(self):
+        return mark_safe('')
+
+    def get_html(self):
+        return mark_safe('')
+
+    def get_option_form(self):
+        html = render_to_string("dojo/report_widget.html", {"form": self.form,
+                                                            "multiple": self.multiple,
+                                                            "title": self.title,
+                                                            "extra_help": self.extra_help})
+        return mark_safe(html)
+
+class FPContent(Widget):
+    def __init__(self, *args, **kwargs):
+        super(FPContent, self).__init__(*args, **kwargs)
+        self.title = 'False Positives'
+        self.form = FPContentForm()
+        self.extra_help = "Select the False Positives File"
+        
+
+    class Meta:
+        exclude = []
+
+    def get_asciidoc(self):
+        return mark_safe('')
+
+    def get_html(self):
+        return mark_safe('')
+
+    def get_option_form(self):
+        html = render_to_string("dojo/report_widget.html", {"form": self.form,
+                                                            "multiple": self.multiple,
+                                                            "title": self.title,
+                                                            "extra_help": self.extra_help})
+        return mark_safe(html)
+
+class AnalysisContent(Widget):
+    def __init__(self, *args, **kwargs):
+        super(AnalysisContent, self).__init__(*args, **kwargs)
+        self.title = 'Analysis Options'
+        self.form = AnalysisContentForm()
+        self.extra_help = "Check the Analysis Options"
+        
+
+    class Meta:
+        exclude = []
+
+    def get_asciidoc(self):
+        return mark_safe('')
+
+    def get_html(self):
+        return mark_safe('')
+
+    def get_option_form(self):
+        html = render_to_string("dojo/report_widget.html", {"form": self.form,
+                                                            "multiple": self.multiple,
+                                                            "title": self.title,
+                                                            "extra_help": self.extra_help})
+        return mark_safe(html)
+
+class LanguageContent(Widget):
+    def __init__(self, *args, **kwargs):
+        super(LanguageContent, self).__init__(*args, **kwargs)
+        self.title = 'Language Options'
+        self.form = LanguageContentForm()
+        self.extra_help = "Check the Language Options"
+        
+
+    class Meta:
+        exclude = []
+
+    def get_asciidoc(self):
+        return mark_safe('')
+
+    def get_html(self):
+        return mark_safe('')
+
+    def get_option_form(self):
+        html = render_to_string("dojo/report_widget.html", {"form": self.form,
+                                                            "multiple": self.multiple,
+                                                            "title": self.title,
+                                                            "extra_help": self.extra_help})
+        return mark_safe(html)
+
+class OpenXMLContent(Widget):
+    def __init__(self, *args, **kwargs):
+        super(OpenXMLContent, self).__init__(*args, **kwargs)
+        self.title = 'Open XML Analysis'
+        self.form = OpenXMLContentForm()
+        self.extra_help = "Load a Scan from XML"
+        
+
+    class Meta:
+        exclude = []
+
+    def get_asciidoc(self):
+        return mark_safe('')
+
+    def get_html(self):
+        return mark_safe('')
+
+    def get_option_form(self):
+        html = render_to_string("dojo/report_widget.html", {"form": self.form,
+                                                            "multiple": self.multiple,
+                                                            "title": self.title,
+                                                            "extra_help": self.extra_help})
+        return mark_safe(html)
+
+class CoverPage(Widget):
+    def __init__(self, *args, **kwargs):
+        super(CoverPage, self).__init__(*args, **kwargs)
+        self.title = 'Source Folder'
+        self.form = CoverPageForm()
+        self.help_text = "Select Source Code Folder"
+
+    def get_html(self):
+        return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.title,
+                                                                                "sub_heading": self.sub_heading,
+                                                                                "meta_info": self.meta_info})
+
+    def get_asciidoc(self):
+        return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.title,
+                                                                                "sub_heading": self.sub_heading,
+                                                                                "meta_info": self.meta_info})
+
+    def get_option_form(self):
+        html = render_to_string("dojo/report_widget.html", {"form": self.form,
+                                                            "multiple": self.multiple,
+                                                            "title": self.title,
+                                                            'extra_help': self.help_text})
+        return mark_safe(html)
 
 class TableOfContents(Widget):
     def __init__(self, *args, **kwargs):
         super(TableOfContents, self).__init__(*args, **kwargs)
-        self.title = 'Load Files'
+        self.title = 'ALM'
         self.form = TableOfContentsForm()
-        self.help_text = "The table of contents includes a page break after its content."
+        self.help_text = "Execute a workflow for obtaining the source code to analyzed"
 
     def get_html(self):
         return render_to_string("dojo/custom_html_toc.html", {"title": self.title,
@@ -282,7 +373,7 @@ class TableOfContents(Widget):
 class WYSIWYGContent(Widget):
     def __init__(self, *args, **kwargs):
         super(WYSIWYGContent, self).__init__(*args, **kwargs)
-        self.title = 'ALM'
+        self.title = 'Analysis Options'
         self.form = WYSIWYGContentForm()
         self.multiple = 'true'
 
