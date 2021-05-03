@@ -4,11 +4,12 @@
 {% block content %}
     <link href="{% static "google-code-prettify/src/prettify.css" %}" rel="stylesheet"/>
     <div class="row">
+        {% include "results.html" %}
         <div class="col-md-8">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
-                        <h4 class="pull-left">Static Analysis</h4>
+                        <h4 class="pull-left">New Analysis</h4>
                     </div>
                 </div>
                 <div class="panel-body in-use-widgets">
@@ -23,11 +24,8 @@
                 <div class="panel-footer">
                     <div class="clearfix">
                         {% feature_reports_pdf_list as feature_reports_pdf_list_flag %}
-                        {% if feature_reports_pdf_list_flag %}
+   
                             <a class="btn btn-success disabled pull-right run_report" href="#">Save and Run</a>
-                        {% else %}
-                            <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -38,6 +36,7 @@
                     <h4>Options</h4>
                 </div>
                 <div class="panel-body available-widgets">
+                    <p>Drag an Option Widget to the left</p>
                     <ul id="sortable1">
                         {% for widget in available_widgets %}
                             <li class="{{ widget.title|slugify }}">
@@ -48,8 +47,10 @@
                 </div>
             </div>
         </div>
-        <form id="custom_report" class="hidden" action="{% url 'custom_report' %}" method="post">
+        <form id="RunStatic" class="hidden" action="{% url 'RunStatic' %}" method="post">
+	    <p>Running Analysis...</p>
             {% csrf_token %}
+            
             <textarea name="json" id="json">
 
             </textarea>
@@ -219,15 +220,22 @@
 
                 var valid = true;
 
-                $('.in-use-widgets .form-control').not('#finding-list .form-control')
-                        .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control').each(function () {
+                $('.in-use-widgets .form-control').not('#TrscanOptions .form-control').each(function () {
                     if ($(this).val() === '')
                         valid = false;
                 });
 
+/*
+		$('.in-use-widgets .form-control').not('#finding-list .form-control')
+                        .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control').each(function () {
+                    if ($(this).val() === '')
+                        valid = false;
+                });
+*/   
                 if (valid) {
 
                     var result = [];
+
                     $('.in-use-widgets form').each(function () {  // loop start for each form
 
                         var _form = $(this);
@@ -245,12 +253,12 @@
 
                     var json_content = JSON.stringify(result);
 
-                    $('form#custom_report textarea#json').val(json_content);
+                    $('form#RunStatic textarea#json').val(json_content);
 
-                    $('form#custom_report').removeClass('hidden').submit();
+                    $('form#RunStatic').removeClass('hidden').submit();
                 }
                 else {
-                    alert('Please complete all forms.')
+                    alert('Please complete all mandatory fields')
                 }
 
                 event.preventDefault();

@@ -123,7 +123,7 @@ v2_api.register(r'test_imports', TestImportViewSet)
 v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)
-v2_api.register(r'admin_users', UsersViewSet)  #SR
+v2_api.register(r'admin-users', UsersViewSet)  #SR
 v2_api.register(r'import-scan', ImportScanView, basename='importscan')
 v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
 v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
@@ -211,6 +211,7 @@ urlpatterns = [
     url(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
     url(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
+
 ]
 
 urlpatterns += survey_urls

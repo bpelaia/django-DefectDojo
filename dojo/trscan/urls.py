@@ -6,4 +6,6 @@ urlpatterns = [
     #  trscan
     url(r'^trscan$',
         views.trscan, name='trscan'),
+    url(r'^trscan/RunStatic$',
+        views.RunStatic, name='RunStatic'),
 ]

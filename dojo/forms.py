@@ -1648,6 +1648,7 @@ class ReportOptionsForm(forms.Form):
     report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 class TrscanOptionsForm(forms.Form):
+    sourcefolder = forms.FilePathField(path='/', required=True, label="Source Folder", allow_folders=True, allow_files=False, recursive=True)
     appl = forms.CharField(max_length=80, required=True, label="Application", help_text="Application")
     vers = forms.CharField(max_length=80, required=True, label="Version", help_text="Version")
     auditor = forms.CharField(max_length=80, required=True, label="Auditor", help_text="Auditor")
@@ -1656,8 +1657,7 @@ class TrscanOptionsForm(forms.Form):
         label="Audit Date",
         help_text="Scan execution date will be used on all findings.",
         initial=datetime.now().strftime("%Y-%m-%d"),
-        widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))  
 
     LOAD_CHOICES = (
 	    ('Folder','Folder'),
@@ -1666,8 +1666,16 @@ class TrscanOptionsForm(forms.Form):
     )
 
     loadtype = forms.CharField(max_length=9,  widget=forms.Select(choices=LOAD_CHOICES), label='Load Type')
+
+    INCR_CHOICES = (
+	    ('---','---'),
+	    ('All','All'),
+	    ('Diff', 'Different Files only'),
+    )
+
+    incr = forms.CharField(max_length=20,  widget=forms.Select(choices=INCR_CHOICES), label='Incremental Analysis')
     
-    incr = forms.BooleanField(required=False, label="Incremental Analysis", help_text="Incremental Analysis")
+    # incr = forms.BooleanField(required=False, label="Incremental Analysis", help_text="Incremental Analysis")
     RULES_CHOICES = (
 	    ('OWASP','OWASP TopTen 2017'),
 	    ('CWE', 'CWE-SANS Top 25'),

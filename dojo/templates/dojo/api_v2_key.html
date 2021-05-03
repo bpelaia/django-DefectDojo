@@ -35,6 +35,6 @@ headers = {'content-type': 'application/json',
            'Authorization': 'Token {{ key.key }}'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
-print.json()
+print (r.json())
 	</pre>
 {% endblock %}

@@ -1,10 +1,14 @@
 import logging
 import mimetypes
 import os
+import subprocess
+import sys
 import re
 import urllib.parse
 from datetime import datetime, timedelta
+from django.views.generic import CreateView
 
+from django.urls import reverse_lazy
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
@@ -25,9 +29,11 @@ from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, Endpoin
 from dojo.forms import ReportOptionsForm, DeleteReportForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint, Report, Risk_Acceptance
-from dojo.trscan.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, ExclusionContent, FPContent, AnalysisContent, LanguageContent, OpenXMLContent, FindingList, EndpointList, \
+from dojo.trscan.widgets import LoadFilesContent, ExclusionContent, FPContent, AnalysisContent, LanguageContent, OpenXMLContent, FindingList, \
     CustomReportJsonForm, TrscanOptions, report_widget_factory
-from dojo.tasks import async_pdf_report, async_custom_pdf_report
+from django.views.generic import ListView
+from .models import Client
+
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
     get_words_for_field, redirect
 from dojo.user.helper import check_auth_users_list
@@ -37,6 +43,40 @@ from dojo.authorization.authorization import user_has_permission_or_403
 
 logger = logging.getLogger(__name__)
 
+class trscan(CreateView):
+    success_url = reverse_lazy("RunStatic")
+
+def RunStatic(request):
+    
+    # saving the report
+    form = CustomReportJsonForm(request.POST)
+    host = trscan_url_resolver(request)
+    import os.path
+
+    
+    #try:
+        # For compatibility to Python 3.6 res=subprocess.run(['cat','/tmp/text.txt'], capture_output=True, text=True).stdout is not used
+        #res = subprocess.run(['wine C:\\Security Reviewer\\SRCheck.bat', '-a', '-v', '-p'], stdout=subprocess.PIPE, universal_newlines=True).stdout
+        #for line in iter(res.stdout.readline, b''): 
+        #    print(line.strip())
+        #    sys.stdout.flush()
+        #now = datetime.now() 
+        #date_time = now.strftime("%m/%d/%Y, %H:%")
+        #res = "Started at " + str(date_time)
+        # return render('results.html', {'res':res.decode("utf-8")}, context_instance=RequestContext(request))
+        #return render('results.html', {'res':res.decode("utf-8")})
+
+    #except Exception as e:
+    	#return render('results.html', {'res':e})
+    if os.getenv('WINEPREFIX'):
+        now = datetime.now() 
+
+        msg = f'Analysis Started at: {now}'
+
+    else:
+        msg = f'Missed Static Reviewer executable'
+    
+    return HttpResponse(msg, content_type='text/plain')
 
 def down(request):
     return render(request, 'disabled.html')
@@ -71,9 +111,7 @@ def trscan(request):
 
     endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
     in_use_widgets = [TrscanOptions(request=request)]
-    available_widgets = [CoverPage(request=request),
-                         TableOfContents(request=request),
-                         WYSIWYGContent(request=request),
+    available_widgets = [LoadFilesContent(request=request),
                          ExclusionContent(request=request),
                          FPContent(request=request),
                          AnalysisContent(request=request),
@@ -84,74 +122,6 @@ def trscan(request):
                   'dojo/TRScan.html',
                   {"available_widgets": available_widgets,
                    "in_use_widgets": in_use_widgets})
-
-def custom_report(request):
-    # saving the report
-    form = CustomReportJsonForm(request.POST)
-    host = report_url_resolver(request)
-    if form.is_valid():
-        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=False, finding_images=False, host=host)
-        report_name = 'Custom PDF Report: ' + request.user.username
-        report_format = 'AsciiDoc'
-        finding_notes = True
-        finding_images = True
-
-        if 'report-options' in selected_widgets:
-            options = selected_widgets['report-options']
-            report_name = 'Custom PDF Report: ' + options.report_name
-            report_format = options.report_type
-            finding_notes = (options.include_finding_notes == '1')
-            finding_images = (options.include_finding_images == '1')
-
-        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=finding_notes, finding_images=finding_images, host=host)
-
-        if report_format == 'PDF':
-            report = Report(name=report_name,
-                            type="Custom",
-                            format=report_format,
-                            requester=request.user,
-                            task_id='tbd',
-                            options=request.POST['json'])
-            report.save()
-            async_custom_pdf_report.delay(report=report,
-                                          template="dojo/custom_pdf_report.html",
-                                          filename="custom_pdf_report.pdf",
-                                          host=host,
-                                          user=request.user,
-                                          uri=request.build_absolute_uri(report.get_url()),
-                                          finding_notes=finding_notes,
-                                          finding_images=finding_images)
-            messages.add_message(request, messages.SUCCESS,
-                                 'Your report is building.',
-                                 extra_tags='alert-success')
-
-            return HttpResponseRedirect(reverse('reports'))
-        elif report_format == 'AsciiDoc':
-            widgets = list(selected_widgets.values())
-            return render(request,
-                          'dojo/custom_asciidoc_report.html',
-                          {"widgets": widgets,
-                           "host": host,
-                           "finding_notes": finding_notes,
-                           "finding_images": finding_images,
-                           "user_id": request.user.id})
-        elif report_format == 'HTML':
-            widgets = list(selected_widgets.values())
-            return render(request,
-                          'dojo/custom_html_report.html',
-                          {"widgets": widgets,
-                           "host": host,
-                           "finding_notes": finding_notes,
-                           "finding_images": finding_images,
-                           "user_id": request.user.id})
-        else:
-            return HttpResponseForbidden()
-    else:
-        return HttpResponseForbidden()
-
-
 
 def validate_date(date, filter_lookup):
     # Today
@@ -208,13 +178,10 @@ def validate(field, value):
             validated_value = None if not len(value) else value
     return (validated_field, validated_value)
 
-def RunStatic(request):
 
-    main="wine srcheck.bat " + in_use_widgets
-    file = os.path.join(os.path.dirname(os.path.abspath(__file__)), main)
-    f = os.popen(file)    
-    data = f.readlines()    
-    f.close() 
+#class TRScanTable(ListView):
+#    model = Client
+#    template_name = "TRScanTable.html"
 
 
 

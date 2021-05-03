@@ -18,6 +18,8 @@ from dojo.forms import TrscanOptionsForm
 from dojo.models import Endpoint, Finding
 from dojo.utils import get_page_items, get_words_for_field
 
+#from .views import RunStatic
+
 """
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets
  to be included.  Each widget will provide a set of options, reporesented by form elements, to be included.
@@ -35,15 +37,8 @@ class CustomReportJsonForm(forms.Form):
             raise forms.ValidationError("Invalid data in json")
         return jdata
 
-
-class CoverPageForm(forms.Form):
-    sourcefolder = forms.FilePathField(path='/', required=True, label="Source Folder", allow_folders=True, allow_files=False, recursive=True)
-    
-    class Meta:
-        exclude = []
-
 class ExclusionContentForm(forms.Form):
-    exclusions = forms.FilePathField(path='/', required=True, label="Exclusion List", allow_folders=False, allow_files=True)
+    exclusions = forms.FilePathField(path='/', required=False, label="Exclusion List", allow_folders=False, allow_files=True)
     
     class Meta:
         exclude = []
@@ -55,28 +50,146 @@ class FPContentForm(forms.Form):
         exclude = []
 
 class AnalysisContentForm(forms.Form):
-    exclusions = forms.FilePathField(path='/', required=True, label="Analysis Options", allow_folders=False, allow_files=True)
+
+    linesBefore = forms.IntegerField(required=False,  
+                     label= "Source Code Lines Before", initial=5) 
+    linesAfter = forms.IntegerField(required=False,  
+                     label= "Source Code Lines After", initial=4)
+    warningTimeOut = forms.IntegerField(required=False,  
+                     label= "Warning TimeOut", initial=50) 
+    maxVulnPerLine = forms.IntegerField(required=False,  
+                     label= "Max vulnerabilities per line of code", initial=3) 
+    maxVulnIssues = forms.IntegerField(required=False,  
+                     label= "Max vulnerabilities issues", initial=1500)
+    applyExclusionList = forms.BooleanField(required=False, label="Apply Exclusion List", initial=True)
+    trustedApplication = forms.BooleanField(required=False, label="Trusted Application", initial=True)
+    internetApplication = forms.BooleanField(required=False, label="Internet Application", initial=False)
+
+    TARGETBROWSER_CHOICES = (
+	    ('Any', 'Any Browser'),
+	    ('Edge_Chromium', 'Internet Explorer Edge Chromium'),
+	    ('Edge', 'Internet Explorer Edge'),
+	    ('IE11','Internet Explorer 11'),
+	    ('IE8_10','Internet Explorer (8-10)'),
+	    ('IE6_7','Internet Explorer (6-7)'),
+	    ('Chrome','Chrome'),
+	    ('Safari','Safari'),
+	    ('FireFox','FireFox'),
+	    ('Opera_Chromium','Opera Chromium'),
+	    ('Opera','Opera'),
+    )
+
+    targetBrowser = forms.ChoiceField(choices=TARGETBROWSER_CHOICES, required=False, label='Target Browser')
+
+    attackVectors = forms.BooleanField(required=False, label="Attack Vectors", initial=False)
+    baseline = forms.BooleanField(required=False, label="Baseline", initial=False)
+    trusted = forms.CharField(label="Trusted Environments", required=False, max_length=1, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    publicFunctions = forms.BooleanField(required=False, label="Public Functions", initial=True)
+    dbQueries = forms.BooleanField(required=False, label="DB Queries", initial=True)
+    envVariables = forms.BooleanField(required=False, label="Environment Variables", initial=False)
+    socket = forms.BooleanField(required=False, label="Socket", initial=False)
+    servlet = forms.BooleanField(required=False, label="Servlet/WS Requests", initial=False)
+    noDeadCode = forms.BooleanField(required=False, label=".NET - No Dead Code for Partial Classes", initial=True)
+    defaultSourceFolder = forms.FilePathField(path='/', required=False, label="Default Source Folder", allow_folders=True, allow_files=False, recursive=True)
+    
     
     class Meta:
         exclude = []
 
 class LanguageContentForm(forms.Form):
-    exclusions = forms.FilePathField(path='/', required=True, label="Language Options", allow_folders=False, allow_files=True)
+    cpp = forms.CharField(label="C/C++", required=False, max_length=1, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    TARGETCPP_CHOICES = (
+	    ('cppGeneric', 'Generic'),
+	    ('cppEmbedded', 'Embedded'),
+	    ('cppUnixLinux32','Unix/Linux 32'),
+	    ('cppUnixLinu64','Unix/Linux 64'),
+	    ('cppWin32A','Win32A (ASCII)'),
+	    ('cppWin32W','Win32W (UNICODE)'),
+	    ('cppWin64','Win64'),
+    )
+
+    targetCPP = forms.ChoiceField(choices=TARGETCPP_CHOICES, label="C/C++ Target Platforms", required=False, initial='Generic')
+
+    TARGETSET_CHOICES = (
+	    ('setGCC','GCC'),
+	    ('setIBMXL','IBM XL C/C++'),
+	    ('setHP','HP C/ac++'),
+	    ('setSun','Sun Pro C/C++'),
+	    ('setLLVM','LLVM Clang'),
+	    ('setARM','ARM RealView'),
+	    ('setARC','ARC MQX Synopsys'),
+	    ('setAtmel','Atmel AVR Studio'),
+	    ('setAtollic','Atollic True Studio'),
+	    ('setAvocet','Avocet ProTools'),
+	    ('setBatronix','Batronix uC51'),
+	    ('setBiPOM','BiPOM Electronics'),
+	    ('setByte','Byte Craft eTPU C'),
+	    ('setCCS','CCS PIC/dsPIC/DSC'),
+	    ('setCeibo','Ceibo-8051C++'),
+	    ('setCodeWarrior','CodeWarrior'),
+	    ('setCosmic','Cosmic Software'),
+	    ('setCrossware','Crossware'),
+	    ('setELLCC','ELLCC C/C++'),
+	    ('setGreenHills','Green Hills Multi'),
+	    ('setHighTec','HighTec'),
+	    ('setIAR','IAR C/C++'),
+	    ('setINRIA','INRIA CompCert'),
+	    ('setIntel','Intel C/C++'),
+	    ('setIntrol','Introl C Compiler'),
+	    ('setKeil','Keil ARm C/C++'),
+	    ('setMentor','Mentor Graphics CodeSourcery'),
+	    ('setMicroChip','MicroChip MPLAB'),
+	    ('setMikroC','MikroC Pro'),
+	    ('setNXP','NXP'),
+	    ('setRenesas','Renesas HEW'),
+	    ('setSDCC','SDCC'),
+	    ('setSoftools','Softools Z/Rabbit'),
+	    ('setTasking','Tasking ESD'),
+    )
+
+    targetSet = forms.ChoiceField(choices=TARGETSET_CHOICES, label="C/C++ Compiler", required=False, initial='GCC')
+
+    CERTMISRACERT_CHOICES = (
+	    ('Misra', 'MISRA'),
+	    ('Cert', 'CERT'),
+    )
+
+    targetCertMisra = forms.CharField(max_length=5, widget=forms.Select(choices=CERTMISRACERT_CHOICES), required=False, label='Industry Standard')
+
+    cobol = forms.CharField(label="COBOL", required=False, max_length=1, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+
+    TARGETCOBOL_CHOICES = (
+	    ('IBMZOS', 'IBM z/OS Enterprise COBOL'),
+	    ('MicroFocus', 'Micro Focus COBOL'),
+    )
+
+    targetCobol = forms.ChoiceField(choices=TARGETCOBOL_CHOICES, required=False, label='Target COBOL Version', help_text="* Legacy Versions, like AcuCOBOL-GT, VS-COBOL-II, Oracle*Pro COBOL, RM-COBOL, Hitachi COBOL pr CA-REALIA, are not reported because they are discontinued")
+
+    STATEMENT_CHOICES = (
+	    ('COBOL88', '88'),
+	    ('COBOL132', '132'),
+	    ('COBOLFree', 'Free Format'),
+    )
+    report_type = forms.ChoiceField(choices=STATEMENT_CHOICES, required=False, label='Statement Length', initial='88')
+    # statementCobol = forms.CharField(max_length=29, widget=forms.Select(choices=STATEMENT_CHOICES), required=False, label='Statement Length', initial='88')
+
+    untrustedWS = forms.BooleanField(required=False, label="Untrusted Working Storage", initial=False)
+    allowCICSProgramming = forms.BooleanField(required=False, label="Allow CICS System Programming", initial=True)
+    copybookFolder = forms.FilePathField(path='/', required=False, label="CopyBook Folder", allow_folders=True, allow_files=False, recursive=True)
+
+    rubyLang = forms.CharField(label="Ruby", required=False, max_length=1, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    rubyFolder = forms.FilePathField(path='/', required=False, label="Ruby Folder", allow_folders=True, allow_files=False, recursive=True)
+
+
+    pythonLang = forms.CharField(label="Python", required=False, max_length=1, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    pythonFolder = forms.FilePathField(path='/', required=False, label="Python Folder", allow_folders=True, allow_files=False, recursive=True)
     
     class Meta:
         exclude = []
 
 class OpenXMLContentForm(forms.Form):
-    exclusions = forms.FilePathField(path='/', required=True, label="Open XML Analysis", allow_folders=False, allow_files=True)
+    exclusions = forms.FilePathField(path='/', required=False, label="Open XML Analysis", allow_folders=False, allow_files=True)
     
-    class Meta:
-        exclude = []
-
-class TableOfContentsForm(forms.Form):
-    sourcefolder = forms.FilePathField(path='/', required=True, label="ALM", allow_folders=True, allow_files=False, recursive=True)
-    
-
-
     class Meta:
         exclude = []
 
@@ -129,8 +242,8 @@ class Div(form_widget):
             force_text(value))
 
 
-class WYSIWYGContentForm(forms.Form):
-    heading = forms.CharField(max_length=80, required=False, initial="Analysis Options")
+class LoadFilesContentForm(forms.Form):
+    heading = forms.CharField(max_length=80, required=False, initial="Load Files")
     content = forms.CharField(required=False, widget=Div(attrs={'class': 'editor'}))
     hidden_content = forms.CharField(widget=forms.HiddenInput(), required=True)
 
@@ -157,34 +270,12 @@ class Widget(object):
     def get_option_form(self):
         return
 
-
-class PageBreak(Widget):
-    def __init__(self, *args, **kwargs):
-        super(PageBreak, self).__init__(*args, **kwargs)
-        self.title = 'Analysis Options'
-        self.form = None
-        self.multiple = "true"
-
-    def get_html(self):
-        return mark_safe('<hr title="Page Break" class="report-page-break"/>')
-
-    def get_asciidoc(self):
-        return mark_safe('<br/><<<<br/>')
-
-    def get_option_form(self):
-        return mark_safe(
-            "<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click "
-            "and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>" +
-            self.get_html() + "</h5><span class='fa fa-arrows pull-right icon'></span></div></div>"
-                              "<form id='page-break'><input type='hidden' name='page-break'/></form></div>")
-
-
 class TrscanOptions(Widget):
     def __init__(self, *args, **kwargs):
         super(TrscanOptions, self).__init__(*args, **kwargs)
         self.title = 'Scan Details'
         self.form = TrscanOptionsForm()
-        self.extra_help = "Fill out the following field and press Run"
+        self.extra_help = "Fill out the following field and press Save and Run"
         
 
     class Meta:
@@ -258,7 +349,6 @@ class AnalysisContent(Widget):
         self.form = AnalysisContentForm()
         self.extra_help = "Check the Analysis Options"
         
-
     class Meta:
         exclude = []
 
@@ -323,58 +413,11 @@ class OpenXMLContent(Widget):
                                                             "extra_help": self.extra_help})
         return mark_safe(html)
 
-class CoverPage(Widget):
+class LoadFilesContent(Widget):
     def __init__(self, *args, **kwargs):
-        super(CoverPage, self).__init__(*args, **kwargs)
-        self.title = 'Source Folder'
-        self.form = CoverPageForm()
-        self.help_text = "Select Source Code Folder"
-
-    def get_html(self):
-        return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.title,
-                                                                                "sub_heading": self.sub_heading,
-                                                                                "meta_info": self.meta_info})
-
-    def get_asciidoc(self):
-        return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.title,
-                                                                                "sub_heading": self.sub_heading,
-                                                                                "meta_info": self.meta_info})
-
-    def get_option_form(self):
-        html = render_to_string("dojo/report_widget.html", {"form": self.form,
-                                                            "multiple": self.multiple,
-                                                            "title": self.title,
-                                                            'extra_help': self.help_text})
-        return mark_safe(html)
-
-class TableOfContents(Widget):
-    def __init__(self, *args, **kwargs):
-        super(TableOfContents, self).__init__(*args, **kwargs)
-        self.title = 'ALM'
-        self.form = TableOfContentsForm()
-        self.help_text = "Execute a workflow for obtaining the source code to analyzed"
-
-    def get_html(self):
-        return render_to_string("dojo/custom_html_toc.html", {"title": self.title,
-                                                                  "depth": self.depth})
-
-    def get_asciidoc(self):
-        return render_to_string("dojo/custom_asciidoc_toc.html", {"title": self.title,
-                                                                  "depth": self.depth})
-
-    def get_option_form(self):
-        html = render_to_string("dojo/report_widget.html", {"form": self.form,
-                                                            "multiple": self.multiple,
-                                                            "title": self.title,
-                                                            'extra_help': self.help_text})
-        return mark_safe(html)
-
-
-class WYSIWYGContent(Widget):
-    def __init__(self, *args, **kwargs):
-        super(WYSIWYGContent, self).__init__(*args, **kwargs)
-        self.title = 'Analysis Options'
-        self.form = WYSIWYGContentForm()
+        super(LoadFilesContent, self).__init__(*args, **kwargs)
+        self.title = 'Load Files'
+        self.form = LoadFilesContentForm()
         self.multiple = 'true'
 
     def get_html(self):
@@ -427,8 +470,7 @@ class FindingList(Widget):
         else:
             self.form = None
         self.multiple = 'true'
-        self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
-                          "report."
+        self.extra_help = "You can use this form to filter Findings and select only the ones regarding the Analysis"
         self.title_words = get_words_for_field(self.findings.qs, 'title')
         self.component_words = get_words_for_field(self.findings.qs, 'component_name')
 
@@ -469,73 +511,6 @@ class FindingList(Widget):
         return mark_safe(html)
 
 
-class EndpointList(Widget):
-    def __init__(self, *args, **kwargs):
-        
-        self.title = 'Analysis Options'
-
-        if 'request' in kwargs:
-            self.request = kwargs.get('request')
-        if 'user_id' in kwargs:
-            self.user_id = kwargs.get('user_id')
-
-        if 'host' in kwargs:
-            self.host = kwargs.get('host')
-        if 'endpoints' in kwargs:
-            self.endpoints = kwargs.get('endpoints')
-        else:
-            raise Exception("Need to instantiate with endpoint queryset.")
-
-        if 'finding_notes' in kwargs:
-            self.finding_notes = kwargs.get('finding_notes')
-        else:
-            self.finding_notes = False
-
-        if 'finding_images' in kwargs:
-            self.finding_images = kwargs.get('finding_images')
-        else:
-            self.finding_images = False
-
-        super(EndpointList, self).__init__(*args, **kwargs)
-
-        if self.request is not None:
-            self.paged_endpoints = get_page_items(self.request, self.endpoints.qs, 25)
-        else:
-            self.paged_endpoints = self.endpoints
-        self.multiple = 'true'
-        self.extra_help = "You can use this form to filter endpoints and select only the ones to be included in the " \
-                          "report."
-
-    def get_html(self):
-        html = render_to_string("dojo/custom_html_report_endpoint_list.html",
-                                {"title": self.title,
-                                 "endpoints": self.endpoints.qs,
-                                 "include_finding_notes": self.finding_notes,
-                                 "include_finding_images": self.finding_images,
-                                 "host": self.host,
-                                 "user_id": self.user_id})
-        return mark_safe(html)
-
-    def get_asciidoc(self):
-        asciidoc = render_to_string("dojo/custom_asciidoc_report_endpoints.html",
-                                    {"endpoints": self.endpoints.qs,
-                                     "host": self.host,
-                                     "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images,
-                                     "user_id": self.user_id})
-        return mark_safe(asciidoc)
-
-    def get_option_form(self):
-        html = render_to_string('dojo/report_endpoints.html',
-                                {"endpoints": self.paged_endpoints,
-                                 "filtered": self.endpoints,
-                                 "request": self.request,
-                                 "title": self.title,
-                                 "extra_help": self.extra_help,
-                                 })
-        return mark_safe(html)
-
-
 def report_widget_factory(json_data=None, request=None, user=None, finding_notes=False, finding_images=False,
                           host=None):
     selected_widgets = OrderedDict()
@@ -556,14 +531,6 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                     d.getlist(item['name']).append(item['value'])
                 else:
                     d[item['name']] = item['value']
-            from dojo.endpoint.views import get_endpoint_ids
-            ids = get_endpoint_ids(endpoints)
-
-            endpoints = Endpoint.objects.filter(id__in=ids)
-            endpoints = EndpointFilter(d, queryset=endpoints, user=request.user)
-            user_id = user.id if user is not None else None
-            endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
-                                     finding_images=finding_images, host=host, user_id=user_id)
 
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = endpoints
 
