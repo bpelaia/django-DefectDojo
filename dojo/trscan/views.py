@@ -32,7 +32,7 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.trscan.widgets import LoadFilesContent, ExclusionContent, FPContent, AnalysisContent, LanguageContent, OpenXMLContent, FindingList, \
     CustomReportJsonForm, TrscanOptions, report_widget_factory
 from django.views.generic import ListView
-from .models import Client
+#from .models import Client
 
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
     get_words_for_field, redirect
