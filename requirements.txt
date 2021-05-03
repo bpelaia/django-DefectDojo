@@ -74,4 +74,5 @@ cvss==2.2
 django-jsonfield-backport==1.0.3
 django-fieldsignals==0.6.0
 hyperlink==21.0.0
+django-auth-ldap==2.4.0
 cx_Oracle
