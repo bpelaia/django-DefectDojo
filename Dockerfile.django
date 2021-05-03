@@ -39,8 +39,8 @@ COPY oracle/tnsnames.ora /
 COPY oracle/instantclient-*-linux.x64-12.1.0.2.0.zip /opt/oracle/
 RUN mkdir -p /opt/oracle && \
   cd /opt/oracle && \
-  unzip instantclient-basic-linux.x64-12.1.0.2.0.zip && \
-  rm -f instantclient-basic-linux.x64-12.1.0.2.0.zip && \
+  unzip instantclient-basiclite-linux.x64-12.1.0.2.0.zip && \
+  rm -f instantclient-basiclite-linux.x64-12.1.0.2.0.zip && \
   unzip instantclient-sqlplus-linux.x64-12.1.0.2.0.zip && \
   rm -f instantclient-sqlplus-linux.x64-12.1.0.2.0.zip && \
   cd /opt/oracle/instantclient* && \
