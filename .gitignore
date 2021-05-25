@@ -1,3 +1,6 @@
+# Oracle instant client and tnsnames.org
+oracle/
+
 # Docker container persistent data
 docker/data/
 docker/static/
