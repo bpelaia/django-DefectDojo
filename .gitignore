@@ -1,3 +1,6 @@
+*.out
+*.bak
+
 # Oracle instant client and tnsnames.org
 oracle/
 
