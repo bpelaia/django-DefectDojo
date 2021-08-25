@@ -19,12 +19,17 @@ RUN \
     git \
     unzip \
     uuid-runtime \
+    # Required for Python-LDAP
+    libldap2-dev \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+## Do not download, use local copy as per Silent Installer: Begin ##
+COPY docker/wheels/* /tmp/wheels/
+#RUN pip3 wheel --wheel-dir=/tmp/wheels --use-deprecated=legacy-resolver -r ./requirements.txt
+## Do not download, use local copy as per Silent Installer: End ##
 
 # Install Oracle Client and SQL*Plus
 # Oracle Download Links: https://www.oracle.com/ro/database/technologies/instant-client/linux-x86-64-downloads.html
@@ -70,6 +75,8 @@ RUN \
     xmlsec1 \
     git \
     uuid-runtime \
+    # Required for Python-LDAP
+    libldap2-dev \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
     curl \

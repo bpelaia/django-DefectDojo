@@ -15,18 +15,49 @@ RUN \
     postgresql-client \
     xmlsec1 \
     git \
+    unzip \
     uuid-runtime \
+    # Required for Python-LDAP
+    libldap2-dev \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+## Do not download, use local copy as per Silent Installer: Begin ##
+COPY docker/wheels/* /tmp/wheels/
+#RUN pip3 wheel --wheel-dir=/tmp/wheels --use-deprecated=legacy-resolver -r ./requirements.txt
+## Do not download, use local copy as per Silent Installer: End ##
+
+# Install Oracle Client and SQL*Plus
+# Oracle Download Links: https://www.oracle.com/ro/database/technologies/instant-client/linux-x86-64-downloads.html
+# Required file to put in oracle/
+# 	instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip
+#	instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip
+# or
+# 	instantclient-basiclite-linux.x64-12.1.0.2.0.zip
+# 	instantclient-sqlplus-linux.x64-12.1.0.2.0.zip
+#
+COPY oracle/tnsnames.ora /
+COPY oracle/instantclient-*-linux.x64-12.1.0.2.0.zip /opt/oracle/
+RUN mkdir -p /opt/oracle && \
+  cd /opt/oracle && \
+  unzip instantclient-basiclite-linux.x64-12.1.0.2.0.zip && \
+  rm -f instantclient-basiclite-linux.x64-12.1.0.2.0.zip && \
+  unzip instantclient-sqlplus-linux.x64-12.1.0.2.0.zip && \
+  rm -f instantclient-sqlplus-linux.x64-12.1.0.2.0.zip && \
+  cd /opt/oracle/instantclient* && \
+  rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci && \
+  ls -1d /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+  mkdir -p network/admin && \
+  mv /tnsnames.ora network/admin && \
+  true
 
 FROM build AS collectstatic
 
 USER root
 ENV \
+  DD_DATABASE_ENGINE="django.db.backends.oracle" \
   # This will point yarn to whatever version of node you decide to use
   # due to the use of nodejs instead of node name in some distros
   node="nodejs"
@@ -49,11 +80,14 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
-RUN pip3 install \
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    ldconfig && \
+    pip3 install \
 	--no-cache-dir \
 	--no-index \
+    --use-deprecated=legacy-resolver \
   --find-links=/tmp/wheels \
-	-r ./requirements.txt
+  -r ./requirements.txt
 
 COPY components/ ./components/
 RUN \
