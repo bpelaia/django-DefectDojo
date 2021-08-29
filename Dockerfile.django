@@ -20,6 +20,7 @@ RUN \
     unzip \
     uuid-runtime \
     # Required for Python-LDAP
+    python-dev libsasl2-dev \
     libldap2-dev \
     && \
   apt-get clean && \
@@ -27,8 +28,8 @@ RUN \
   true
 COPY requirements.txt ./
 ## Do not download, use local copy as per Silent Installer: Begin ##
-COPY docker/wheels/* /tmp/wheels/
-#RUN pip3 wheel --wheel-dir=/tmp/wheels --use-deprecated=legacy-resolver -r ./requirements.txt
+#COPY docker/wheels/* /tmp/wheels/
+RUN pip3 install --no-cache-dir --upgrade pip && pip3 wheel --wheel-dir=/tmp/wheels --use-deprecated=legacy-resolver -r ./requirements.txt
 ## Do not download, use local copy as per Silent Installer: End ##
 
 # Install Oracle Client and SQL*Plus
@@ -76,7 +77,7 @@ RUN \
     git \
     uuid-runtime \
     # Required for Python-LDAP
-    libldap2-dev \
+    libsasl2-2 libldap-2.4-2 \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
     curl \
